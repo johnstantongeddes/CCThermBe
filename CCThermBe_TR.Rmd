@@ -1,0 +1,73 @@
+---
+title: "Thermal Behavior Technical Report"
+author: "John Stanton-Geddes"
+date: '2014-04-17'
+output: html_document
+---
+
+Analysis of foraging behavior by heat-shocked and control ants in experimental even-aged colonies of *Pogonomyrmex barbatus*. 
+
+```{r libraries}
+library(pander)
+library(stringr)
+```
+
+
+```{r load_data}
+data <- read.csv("data/CCThermBe_observations.csv")
+str(data)
+```
+
+Five levels of 'forager_color' when we only expected 4. Check this:
+
+```{r}
+unique(levels(data$forager_color))
+```
+
+Okay - some "red " with trailing space. Change these to "red" by removing trailing spaces from all levels.
+
+```{r}
+data$forager_color <- str_trim(data$forager_color)
+unique(data$forager_color)
+```
+
+Assign treatment to colors for each colony.
+
+```{r treatment}
+# if colony == 1 & color == blue trt <- control
+test <- vector(length = nrow(data))
+
+data$trt <- ifelse(data$colony == 1 & data$forager_color == "blue", "control", 
+                    ifelse(data$colony == 1 & data$forager_color == "red", "heat", 
+                           ifelse(data$colony == 2 & data$forager_color == "blue", "control", 
+                                  ifelse(data$colony == 2 & data$forager_color == "green", "heat", 
+                                         NA))))
+# check
+table(data$forager_color, data$trt, data$colony)
+```
+
+For each colony, chi-squared test to evaluate if the proportion of ants foraging depends on heat treatment
+
+```{r colony1}
+data$trt <- as.factor(data$trt)
+str(data)
+
+data1 <- data[which(data$colony == 1 & !is.na(data$trt)), ]
+str(data1)  
+
+chisq.test(as.numeric(data1$trt))
+plot(data1$trt)
+```
+
+No difference in foraging among treatments - almost exactly 50:50.
+
+Same analyis for colony 2.
+
+```{r colony2}
+data2 <- data[which(data$colony == 2 & !is.na(data$trt)), ]
+str(data2)  
+
+chisq.test(as.numeric(data2$trt))
+plot(data2$trt)
+```
+
