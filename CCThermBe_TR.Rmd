@@ -2,19 +2,26 @@
 title: "Thermal Behavior Technical Report"
 author: "John Stanton-Geddes"
 date: '2014-04-17'
-output: html_document
+output: pdf_document
 ---
+
+# Introduction
+
+# Methods
+
+# Results
 
 Analysis of foraging behavior by heat-shocked and control ants in experimental even-aged colonies of *Pogonomyrmex barbatus*. 
 
 ```{r libraries}
 library(pander)
 library(stringr)
+library(ggplot2)
 ```
 
 
 ```{r load_data}
-data <- read.csv("data/CCThermBe_observations.csv")
+data <- read.csv("data/CCThermBe_observations.csv", stringsAsFactors = FALSE)
 str(data)
 ```
 
@@ -56,7 +63,7 @@ data1 <- data[which(data$colony == 1 & !is.na(data$trt)), ]
 str(data1)  
 
 chisq.test(as.numeric(data1$trt))
-plot(data1$trt)
+qplot(data1$trt, xlab = "Treatment", ylab = "Number of foragers")
 ```
 
 No difference in foraging among treatments - almost exactly 50:50.
@@ -68,6 +75,42 @@ data2 <- data[which(data$colony == 2 & !is.na(data$trt)), ]
 str(data2)  
 
 chisq.test(as.numeric(data2$trt))
-plot(data2$trt)
+qplot(data2$trt, xlab = "Treatment", ylab = "Number of foragers")
 ```
 
+
+Possible that the effects of heat-shock on foraging behavior diminished over time as many of the workers died in the colonies over time. So we next try the analysis focusing on the first two weeks after treatment only.
+
+```{r early_only_c1}
+# for colony 1, extract first three sampling dates
+# convert date info into format 'mm/dd/yyyy'
+data1$date <- as.Date(data1$date, "%m/%d/%Y")
+str(data1)
+
+# select first 4 observation dates
+data1.early <- data1[which(data1$date %in% unique(data1$date)[1:4]), ]
+str(data1.early)
+
+chisq.test(as.numeric(data1.early$trt))
+qplot(data1.early$trt, xlab = "Treatment", ylab = "Number of foragers")
+```
+
+
+Still no difference for colony 1. In fact, more of the foragers were from the "control" group.
+
+Test for colony 2.
+
+```{r early_only_c2}
+# convert date info into format 'mm/dd/yyyy'
+data2$date <- as.Date(data2$date, "%m/%d/%Y")
+str(data2)
+
+# select first 4 observation dates
+data2.early <- data2[which(data2$date %in% unique(data2$date)[1:4]), ]
+str(data2.early)
+
+chisq.test(as.numeric(data2.early$trt))
+qplot(data2.early$trt, xlab = "Treatment", ylab = "Number of foragers")
+```
+
+Same as for colony 1. 
